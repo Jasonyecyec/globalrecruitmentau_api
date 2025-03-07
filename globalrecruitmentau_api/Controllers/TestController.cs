@@ -26,27 +26,24 @@ namespace globalrecruitmentau_api.Controllers
             return Ok(samples);
         }
 
-        // GET: api/<ValuesController>
-        //[HttpGet]
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2", "hot reload" };
-        //}
-
         // GET api/<ValuesController>/5
         [HttpGet("{id}")]
         [HttpHead("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<Sample>> GetSampleDetails(int id)
         {
-            return $"You requested working na ayos delay TETE: {id}";
+            var sampleData = await _context.Sample.FindAsync(id);
 
+            if (sampleData == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(sampleData);   
         }
 
         // POST api/<ValuesController>
         //[HttpPost]
-        //public void Post([FromBody]string value)
-        //{
-        //}
+ 
         [HttpPost]
         public async Task<ActionResult<Sample>> CreateSample([FromBody] Sample sample)
         {
