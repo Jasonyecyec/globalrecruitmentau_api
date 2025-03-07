@@ -1,0 +1,63 @@
+
+services:
+  mysql:
+    # image: mysql:latest
+    image: jasonyecyec/globalrecruitmentau:mysql-latest
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: globalrecruitmentau
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mynetwork
+
+  phpmyadmin:
+    # image: phpmyadmin/phpmyadmin
+    image: jasonyecyec/globalrecruitmentau:phpmyadmin-latest
+    container_name: phpmyadmin-container
+    restart: always
+    environment:
+      PMA_HOST: mysql
+    ports:
+      - "8082:80"
+    depends_on:
+      - mysql
+    networks:
+      - mynetwork
+
+  api:
+    build:
+     context: .
+     dockerfile: Dockerfile
+     # target: development # used for local development
+     target: final
+    image: globalrecruitmentau_api-api
+    container_name: dotnet-api-container
+    restart: always
+    ports:
+      - "8080:8080"
+      # - "8081:8081" 
+    environment:
+      ConnectionStrings__DefaultConnection: "server=mysql;port=3306;Database=globalrecruitmentau;User=myuser;Password=mypassword;"
+      # ASPNETCORE_ENVIRONMENT: "Development" # used for local development
+      ASPNETCORE_ENVIRONMENT: "Production"
+      # ASPNETCORE_URLS: "http://+:8080;https://+:8081" # used for local development
+      ASPNETCORE_URLS: "http://+:8080"
+    depends_on:
+      - mysql
+    networks:
+      - mynetwork
+    #volumes:            # used for local development
+     #- .:/app 
+     # - ~/.dotnet/corefx/cryptography/x509stores:/root/.dotnet/corefx/cryptography/x509stores
+networks:
+  mynetwork:
+
+volumes:
+  mysql_data:
